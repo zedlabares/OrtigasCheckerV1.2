@@ -207,7 +207,7 @@ function parseFile(content) {
 
     if (i === 3)  oldACCSales     = rawNum;
     if (i === 5)  totGrossAmount  = rawNum;
-    if (i >= 6  && i <= 21) totalDeductions  += rawNum;
+    if (i >= 7  && i <= 21) totalDeductions  += rawNum;
     if (i >= 23 && i <= 27) totalNASD        += rawNum;
     if (i === 36) newAccNV        = rawNum;
     if (i === 38) totGrossNV      = rawNum;
