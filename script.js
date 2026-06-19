@@ -176,7 +176,7 @@ function parseFile(content) {
   // ── Accumulators (raw integer cents, before ÷100) ──────────────────────
   let oldACCSales      = 0;  // i=3  → line 4
   let totGrossAmount   = 0;  // i=5  → line 6
-  let totalDeductions  = 0;  // i=6..21  → lines 7-22
+  let totalDeductions  = 0;  // i=7..21  → lines 8-22  [UPDATED 2026-06-19: was i=6..21 / lines 7-22]
   let totalNASD        = 0;  // i=23..27 → lines 24-28
   let newAccNV         = 0;  // i=36 → line 37 (Old Acc Sales Non-VAT)
   let totGrossNV       = 0;  // i=38 → line 39
@@ -207,6 +207,17 @@ function parseFile(content) {
 
     if (i === 3)  oldACCSales     = rawNum;
     if (i === 5)  totGrossAmount  = rawNum;
+    /**
+     * Total Deductions (VAT) accumulator — VAT BUSINESS RULE CHANGE (2026-06-19):
+     * Previously: if (i >= 6  && i <= 21) → summed lines 7–22 (included line 7,
+     *   "Total Deductions", as one of its own inputs).
+     * Now:        if (i >= 7  && i <= 21) → sums lines 8–22 only, excluding the
+     *   "Total Deductions" line itself. Lines 8–22 are the itemized deduction
+     *   categories (Promo, Discount, Refund, Returned Items, Other Taxes,
+     *   Service Charge, Adjustment Discount, Void Amount, Discount Cards,
+     *   Delivery Charges, Gift Certificates, Store Discounts 1–4).
+     * Upper bound (i<=21 → line 22) is unchanged.
+     */
     if (i >= 7  && i <= 21) totalDeductions  += rawNum;
     if (i >= 23 && i <= 27) totalNASD        += rawNum;
     if (i === 36) newAccNV        = rawNum;
@@ -234,6 +245,10 @@ function parseFile(content) {
 
    All inputs are raw integer cents (×100).
    All outputs are rounded to 2dp before returning.
+
+   NOTE (2026-06-19): "Deductions" here refers to the VAT-side
+   totalDeductions accumulator, which as of this update sums
+   lines 8–22 (previously lines 7–22). See parseFile() above.
    ============================================================ */
 
 /**
@@ -270,7 +285,8 @@ function computeAdminValues(acc) {
 
     /**
      * Line 7 — Total Deductions (VAT)
-     * = sum of file lines 7–22 / 100
+     * = sum of file lines 8–22 / 100
+     * [UPDATED 2026-06-19: previously summed lines 7–22]
      */
     7:  round2(totalDeductions / 100),
 
